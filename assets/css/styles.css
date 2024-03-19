@@ -45,9 +45,7 @@ form input::placeholder {
     font-weight: 100;
 }
 
-.overlay-wrapper {
-    display: none;
-}
+
 
 .search-result-wrapper {
     display: flex;
@@ -86,4 +84,67 @@ form input::placeholder {
 
 .recent-wrapper div img {
     width: calc((80vw - 12px - 10px * 7)/8);
+}
+
+.overlay-wrapper {
+    background-color: rgba(0, 0, 0, 0.9);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-inner {
+    max-width: 800px;
+    width: 100%;
+    padding: 50px;
+    background-color: #fff;
+    border-radius: 5px;
+    position: relative
+}
+
+.overlay-inner button {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    border: none;
+    background: transparent;
+    font-size: 25px;
+    cursor: pointer;
+}
+
+.overlay-inner button:hover {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.overlay-inner > div {
+    display: flex;
+    gap: 20px;
+}
+
+.overlay-inner img {
+    width: 100%;
+}
+
+
+.overlay-inner h2 {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.overlay-inner dt {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.overlay-inner dd {
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: rgba(0, 0, 0, 0.8);
 }
