@@ -151,3 +151,7 @@ form input::placeholder {
     margin-bottom: 30px;
     color: rgba(0, 0, 0, 0.8);
 }
+
+.hide-overlay {
+    display: none;
+}
