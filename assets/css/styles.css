@@ -131,6 +131,9 @@ form input::placeholder {
     width: 100%;
 }
 
+.overlay-inner > div > div {
+    flex-basis: 50%;
+}
 
 .overlay-inner h2 {
     font-size: 25px;
