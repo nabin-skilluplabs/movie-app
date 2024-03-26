@@ -1,23 +1,35 @@
+const API_KEY = 'd41d8bb0db419dbf25b142defe21dabb';
+const READ_TOKEN_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkNDFkOGJiMGRiNDE5ZGJmMjViMTQyZGVmZTIxZGFiYiIsInN1YiI6IjY2MDEzYTU5MDQ3MzNmMDE3ZGVlZmIxYiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.QkmxyS6I5bPzVw-7l2SoG6cc9wO7C5JQXWPaTJmdGZI';
+
 class Movie {
-    constructor(title, year, release, genre, director, writer, plot, poster) {
+    constructor(title, release, plot, poster) {
         this.title = title;
-        this.year = year;
         this.release = release;
-        this.genre = genre;
-        this.director = director;
-        this.writer = writer;
         this.plot = plot;
         this.poster = poster;
     }
 }
 
 class MovieApp {
+    #cookie = '';
     constructor() {
         this.searchQuery = "";
         this.resultMovie = null;
-        this.recentMovies = [];
+        this.recentMovies = () => {
+            const cookie = document.cookie;
+            console.log(cookie);
+        };
         this.activeMovie = null;
+       
     }
+
+    get cookie() {
+        return document.cookie;
+    }
+    set cookie(value) {
+        document.cookie = value;
+    }
+
 
     showResult() {
         const searchResultWrapper = document.querySelector(".search-result-wrapper");
@@ -31,37 +43,55 @@ class MovieApp {
         `)
     }
 
+    renderRecentMovies() {
+        const recentElements =  this.recentMovies.map(movie => {
+            return `
+            <img src="${`https://image.tmdb.org/t/p/w500${movie.poster_path}`}"
+            alt="">
+            `
+        });
+        const recentWrapper = document.querySelector(".recent-wrapper div");
+        recentWrapper.innerHTML = recentElements.join("");
+    }
+
     async searchMovie(event) {
         if(event.code === "Enter") {
             event.preventDefault();
             const searchInput = document.querySelector("input");
             const searchQuery = searchInput.value;
             this.searchQuery = searchQuery;
-            const apiEndpoint = `http://www.omdbapi.com/?t=${searchQuery}&apikey=45112140`;
+            // const apiEndpoint = `http://www.omdbapi.com/?t=${searchQuery}&apikey=45112140`;
+            const apiEndpoint = `https://api.themoviedb.org/3/search/movie?include_adult=false&language=en-US&page=1&query=${searchQuery}&api_key=${API_KEY}`;
             const response = await fetch(apiEndpoint);
-            const result = await response.json();
-            if(result) {
-                console.log(result);
-                this.resultMovie = new Movie(
-                    result.Title, 
-                    result.Year,
-                    result.Released,
-                    result.Genre,
-                    result.Director,
-                    result.Writer,
-                    result.Plot,
-                    result.Poster
-                );
+            const responseData = await response.json();
+            console.log(responseData);
+            const movies = responseData.results.filter(result => result.title && result.poster_path && result.release_date).slice(0, 10);
+            if(movies.length) {
+                this.recentMovies.unshift(movies[0].poster_path);
+                this.renderRecentMovies();
+                const date = new Date();
+                const expireDateAndTime = date.setTime(date.getTime() + 1000 * 60 * 60 * 24 * 7);
                 
+                this.cookie = `recentMovies=${JSON.stringify(this.recentMovies)};expires=${new Date(expireDateAndTime)};path=/`;
+
+                const resultElements = movies.map(result => {
+                    this.resultMovie = new Movie(
+                        result.title, 
+                        result.release_date,
+                        result.overview,
+                        `https://image.tmdb.org/t/p/w500${result.poster_path}`
+                    );
+                    return `
+                        <div>
+                            <img src="${this.resultMovie.poster}"
+                                alt="">
+                            <h3>${this.resultMovie.title}</h3>
+                            <p>${this.resultMovie.release}</p>
+                        </div>
+                    `;
+                });
                 const searchResultWrapper = document.querySelector(".search-result-wrapper");
-                searchResultWrapper.innerHTML = `
-                <div>
-                    <img src="${this.resultMovie.poster}"
-                        alt="">
-                    <h3>${this.resultMovie.title}</h3>
-                    <p>${this.resultMovie.genre}</p>
-                </div>
-                `;
+                searchResultWrapper.innerHTML = resultElements.join("");
             }
         }
     }
@@ -69,15 +99,16 @@ class MovieApp {
     attachSearchEventListener() {
         const searchInput = document.querySelector("input");
         this.searchInput = searchInput;
-        searchInput.addEventListener("keydown", this.searchMovie)
+        searchInput.addEventListener("keydown", (event) => {
+            this.searchMovie(event);
+        })
     }
 }
 
 
 const movieAppObject  = new MovieApp();
 movieAppObject.attachSearchEventListener();
-console.log(movieAppObject);
-
+console.log(movieAppObject.recentMovies());
 
 const movieObject = new Movie(
     'Guardians of the Galaxy Vol. 2',
